@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Grama Niladhari Info Portal</title>
+<style>
+body { font-family: Arial, sans-serif; margin:0; background:#f7fafd; }
+.container { margin:40px auto; max-width:700px; padding:36px; background:#eef4fa; border-radius:4px; box-shadow:0 2px 16px #0001; }
+.title { font-size:24px; font-weight:bold; color:#2389c7; margin-bottom:36px; }
+.form-group { margin-bottom:30px; }
+label { font-weight:bold; display:block; margin-bottom:8px; color:#34495e; }
+select { width:100%; padding:10px; font-size:16px; border-radius:3px; border:1px solid #b6c3cd; background:#fff; }
+.show-btn { background:#2389c7; color:#fff; font-size:13px; font-weight:700; border:none; border-radius:6px; padding:6px 12px; width:120px; margin:12px auto 0; display:block; cursor:pointer; text-align:center; text-decoration:none; }
+</style>
+</head>
+<body>
+
+<div class="container">
+<div class="title">Grama Niladhari Information Portal</div>
+
+<div class="form-group">
+<label for="district">District *</label>
+<select id="district" onchange="updateDivision()">
+<option value="">Select a District</option>
+</select>
+</div>
+
+<div class="form-group">
+<label for="division">Divisional Secretariat *</label>
+<select id="division">
+<option value="">Select a Division</option>
+</select>
+</div>
+
+<a id="btn-show" class="show-btn" href="#">Show</a>
+</div>
+
+<script>
+// Divisions data (example for brevity, add all 25 districts + divisions)
+const divisions = {
+"Ampara":["Ampara","Dehiattakandiya","Kalmunai","Ninthavur","Sainthamaruthu","Uhana","Navithanveli","Sammanthurai"],
+"Anuradhapura":["Anuradhapura","Galnewa","Galenbindunuwewa","Ipalogama","Kahatagasdigiliya","Kekirawa","Medawachchiya","Nachchaduwa","Padaviya","Palagala","Palwewa","Thalawa","Tragammuwa","Nochchiyagama"],
+"Badulla":["Badulla","Bandarawela","Haldummulla","Haputale","Mahiyanganaya","Uva Paranagama","Passara","Soranatota","Welimada"],
+"Batticaloa":["Batticaloa","Eravur","Kalkudah","Kattankudy","Manmunai North","Manmunai South & Eruvil Pattu","Koralai Pattu North","Koralai Pattu South","Manmunai West","Porativu Pattu"],
+"Colombo":["Colombo","Dehiwala","Homagama","Kaduwela","Kesbewa","Kolonnawa","Maharagama","Moratuwa","Padukka","Ratmalana","Seethawaka","Sri Jayawardenepura Kotte","Thimbirigasyaya"],
+"Galle":["Akmeemana","Ambalangoda","Baddegama","Balapitiya","Benthota","Bope-Poddala","Elpitiya","Galle Four Gravets","Habaraduwa","Imaduwa","Karandeniya","Nagoda","Neluwa","Thawalama","Welivitiya-Divithura","Yakkalamulla"],
+"Gampaha":["Attanagalla","Biyagama","Divulapitiya","Dompe","Gampaha","Ja-Ela","Katana","Kelaniya","Mahara","Minuwangoda","Mirigama","Negombo","Wattala"],
+"Hambantota":["Ambalantota","Angunakolapelessa","Beliatta","Hambantota","Katuwana","Lunugamvehera","Okewela","Sooriyawewa","Tangalle","Tissamaharama","Walasmulla","Weeraketiya"],
+"Jaffna":["Chavakachcheri","Delft","Jaffna","Karainagar","Kayts","Kopay","Manipay","Nallur","Point Pedro","Sandilipay","Tellippalai","Uduvil","Valikamam East","Valikamam North","Valikamam South","Valikamam South West","Valikamam West","Velanai"],
+"Kalutara":["Agalawatta","Bandaragama","Beruwala","Bulathsinhala","Dodangoda","Horana","Kalutara","Madurawela","Mathugama","Millaniya","Palindanuwara","Panadura","Walallawita"],
+"Kandy":["Akurana","Delthota","Doluwa","Ganga Ihala Korale","Harispattuwa","Hatharaliyadda","Kandy Four Gravets","Kundasale","Medadumbara","Minipe","Pasbage Korale","Pujapitiya","Thumpane"],
+"Kegalle":["Kegalle","Aranayaka","Deraniyagala","Galigamuwa","Mawanella","Rambukkana"],
+"Kilinochchi":["Kilinochchi","Pachchilaipalli","Poonakari","Karachchi"],
+"Kurunegala":["Alawwa","Ambanpola","Balagala","Bingiriya","Dambadeniya","Ehetuwewa","Galgamuwa","Giribawa","Hettipola","Ibbagamuwa","Kurunegala","Mawathagama","Narammala","Nikaweratiya","Pannala","Polpithigama","Ragama","Ridigama","Wariyapola"],
+"Mannar":["Mannar","Manthai East","Manthai West","Musali","Nanaddan"],
+"Matale":["Ambanganga Korale","Dambulla","Galewela","Laggala-Pallegama","Matale","Naula","Pallepola","Rattota","Ukuwela","Wilgamuwa","Yatawatta"],
+"Matara":["Akuressa","Athuraliya","Devinuwara","Dickwella","Hakmana","Kamburupitiya","Kirinda Puhulwella","Malimbada","Matara","Mulatiyana","Pasgoda","Pitabeddara","Thihagoda","Weligama","Welipitiya"],
+"Monaragala":["Monaragala","Badalkumbura","Buttala","Wellawaya","Bibile","Medagama"],
+"Mullaitivu":["Mullaitivu","Maritimepattu","Puthukudirippu","Oddusuddan","Palliyagodella"],
+"Nuwara Eliya":["Ambagamuwa","Hanguranketha","Kotmale","Nallathanniya","Nuwara Eliya","Walapane"],
+"Polonnaruwa":["Polonnaruwa","Dimbulagala","Elahera","Hingurakgoda","Lankapura","Medirigiriya","Thamankaduwa"],
+"Puttalam":["Anamaduwa","Arachchikattuwa","Chilaw","Dankotuwa","Kalpitiya","Mundalama","Nattandiya","Puttalam"],
+"Ratnapura":["Ratnapura","Ayagama","Balangoda","Belihuloya","Eheliyagoda","Kahawatta","Kalthota","Kuruwita","Nivithigala","Pelmadulla","Elpitiya","Muttettuwewa"],
+"Trincomalee":["Trincomalee","Gomarankadawala","Kantalai","Kinniya","Muttur","Seruvila","Thampalakamam","Verugal"],
+"Vavuniya":["Vavuniya","Vavuniya North","Vavuniya South","Vengalacheddikulam"]
+};
+
+// Populate Districts in Alphabetical order
+const districtSelect = document.getElementById("district");
+Object.keys(divisions).sort().forEach(d => {
+  let option = document.createElement("option");
+  option.value = d;
+  option.text = d;
+  districtSelect.appendChild(option);
+});
+
+// Update division dropdown based on district
+function updateDivision(){
+  const district = districtSelect.value;
+  const divisionSelect = document.getElementById("division");
+  divisionSelect.innerHTML = "<option value=''>Select a Division</option>";
+  if(divisions[district]){
+    divisions[district].sort().forEach(div=>{
+      let option = document.createElement("option");
+      option.value = div;
+      option.text = div;
+      divisionSelect.appendChild(option);
+    });
+  }
+}
+
+// Show button click → open t.html with parameters
+document.getElementById("btn-show").addEventListener("click", function(e){
+  e.preventDefault();
+  const district = document.getElementById("district").value;
+  const division = document.getElementById("division").value;
+  if(district && division){
+    const url = "t.html?district=" + encodeURIComponent(district) + "&division=" + encodeURIComponent(division);
+    window.open(url, "_blank"); // opens in new tab
+  } else {
+    alert("Please select both District and Division.");
+  }
+});
+</script>
+
+</body>
+</html>
